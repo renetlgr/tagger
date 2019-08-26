@@ -1,0 +1,37 @@
+{
+    "DO2": {
+        "Add": [
+            {"MyTag1": "MyValue1" },
+            {"MyTag2": "MyValue2" }
+        ],
+        "Remove": [
+            {"MyTag3": "MyValue3" },
+            {"MyTag4": "MyValue4" }
+        ]
+    },
+    "DO4": {
+        "Add": [
+            {"MyTag3": "MyValue3" },
+            {"MyTag4": "MyValue4" }
+        ],
+        "Remove": [
+            {"MyTag1": "MyValue1" },
+            {"MyTag2": "MyValue2" }
+        ]
+    },
+    "DO6": {
+        "Add": [
+            {"MyTag3": "MyValue3" },
+            {"MyTag4": "MyValue4" }
+        ],
+        "Remove": [
+            {"MyTag1": "MyValue1" },
+            {"MyTag2": "MyValue2" }
+        ]
+    },
+    "DO3": {
+        "Add": [],
+        "Remove": [
+        ]
+    }
+}
