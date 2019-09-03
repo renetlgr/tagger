@@ -22,10 +22,9 @@ async function getStacks() {
         let stacks = []
         let stacksAWS = await cloudformation.describeStacks(params).promise();
         stacksAWS.Stacks.filter(stackAWS => {
-            let splitClusterName = stackAWS.StackName.split('-')[1]; 
             if ((stackAWS.StackName.indexOf("DO") > -1)) {
                 stacks.push({
-                    Cluster: splitClusterName,
+                    Cluster: stackAWS.StackName,
                     StackId: stackAWS.StackId,
                     Status: stackAWS.StackStatus,
                     Tags: stackAWS.Tags
