@@ -1,36 +1,12 @@
 {
-    "DO2": {
+    "DO1": {
         "Add": [
-            {"MyTag1": "MyValue1" },
-            {"MyTag2": "MyValue2" }
+            { "CreatedBy": "SSP" },
+            { "Schedule": "{\"start\":\"07:40 pm\",\"end\":\"07:50 pm\",\"weekdays\":[2,4,3,5,6]}" },
+            { "Cluster": "DO1" },
+            { "Team": "DO1" },
+            { "EndDate": "2019-08-30" }
         ],
-        "Remove": [
-            {"MyTag3": "MyValue3" },
-            {"MyTag4": "MyValue4" }
-        ]
-    },
-    "DO4": {
-        "Add": [
-            {"MyTag3": "MyValue3" },
-            {"MyTag4": "MyValue4" }
-        ],
-        "Remove": [
-            {"MyTag1": "MyValue1" },
-            {"MyTag2": "MyValue2" }
-        ]
-    },
-    "DO6": {
-        "Add": [
-            {"MyTag3": "MyValue3" },
-            {"MyTag4": "MyValue4" }
-        ],
-        "Remove": [
-            {"MyTag1": "MyValue1" },
-            {"MyTag2": "MyValue2" }
-        ]
-    },
-    "DO3": {
-        "Add": [],
         "Remove": [
         ]
     }

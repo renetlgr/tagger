@@ -4,14 +4,15 @@ const EC2 = new AWS.EC2({ apiVersion: '2016-11-15' });
 
 const DATA = require('./data.json');
 let stacks = [];
+const IGNORE_REMOVE_VALUE = true;
 
 async function main() {
     stacks = await getStacks();
+    let date = new Date().toDateString();
+    console.log('Executed,', date);
+    console.log('CLUSTERS,', listOfStacks(stacks));
     console.log();
-    console.log('CLUSTERS', listOfStacks(stacks));
-    console.log('----------------------------------------------------------------------------------------');
-    show(stacks);
-    console.log('DONE!');
+    spliter(stacks);
 }
 
 async function getStacks() {
@@ -44,10 +45,13 @@ async function getStacks() {
 }
 
 function listOfStacks(stacks) {
-    let list = [];
+    let list = '[ '
+    // let list = [];
     stacks.map(stack => {
-        list.push(stack.Cluster);
+        list += stack.Cluster + ' ';
+    //     list.push(stack.Cluster);
     });
+    list += ']';
     return list;
 }
 
@@ -94,98 +98,80 @@ function orderData(ArrayInstances) {
     return result;
 }
 
-function show(stacks) {
+function spliter(stacks) {
+    console.log('CLUSTER, CONFIGURED, ACTION, TAG, VALUE');
     stacks.map(stack => {
         if (DATA[stack.Cluster]) {
-            console.log('CLUSTER', stack.Cluster);
-            console.log('   Remove: ');
-            if (DATA[stack.Cluster].Remove.length !== 0) {
-                DATA[stack.Cluster].Remove.map(tag => {
-                    console.log('           -', tag);
+            let remove = keyValueJSONForm(DATA[stack.Cluster].Remove , IGNORE_REMOVE_VALUE);
+            let add = keyValueJSONForm(DATA[stack.Cluster].Add);
+            if (remove.length !== 0) {
+                // console.log('STACKS::',stack);
+                remove.map(tag => {
+                    console.log(`${stack.Cluster},${true},Remove,${tag.Key}`);
                 });
+                untagger(stack.instances, remove);
             } else {
-                console.log('           - Nothing to REMOVE');
+                console.log(`${stack.Cluster},${true},Remove,None`);
             }
-            console.log('   Add: ');
-            if (DATA[stack.Cluster].Add.length !== 0) {
-                DATA[stack.Cluster].Add.map(tag => {
-                    console.log('           -', tag);
+            if (add.length !== 0) {
+                add.map(tag => {
+                    console.log(`${stack.Cluster},${true},Add,${tag.Key},${tag.Value}`);
                 });
+                tagger(stack.instances, add);
             } else {
-                console.log('           - Nothing to ADD');
+                console.log(`${stack.Cluster},${true},Add,None,None`);
             }
-            console.log('----------------------------------------------------------------------------------------');
         } else {
-            console.log('Nothing to change for ', stack.Cluster);
-            console.log('----------------------------------------------------------------------------------------');
+            console.log(`${stack.Cluster},${false},Add`);
+            console.log(`${stack.Cluster},${false},Remove`);
 
         }
     });
 }
 
-// function splitInstances(instances) {
-//     let dataKeys = Object.keys(DATA);
-//     let remove;
-//     let add;
-//     let instance;
-//     dataKeys.map(key => {
-//         remove = keyValueJSONForm(DATA[key].Remove);
-//         add = keyValueJSONForm(DATA[key].Add);
-//         instance = getInstancesToUpdateTags(key, instances);
-//         untagger(instance, remove);
-//         tagger(instance, add);
-//     });
-// }
+async function tagger(instances, tagsToAdd) {
+    try {
+        var params = {
+            "Resources": instances,
+            "Tags": tagsToAdd
+        };
+        let result = await EC2.createTags(params).promise();
+        console.log('RESULT::', result);
+    } catch (error) {
+        console.log('ERROR::', error);
+    }
+}
 
-// function getInstancesToUpdateTags(key, instances) {
-//     let result = [];
-//     instances.map(instance => {
-//         if (instance.Cluster === key) {
-//             result.push(instance.InstanceId);
-//         }
-//     });
-//     return result;
-// }
+async function untagger(instances, tagsToRemove) {
+    try {
+        var params = {
+            "Resources": instances,
+            "Tags": tagsToRemove
+        };
+        let result = await EC2.deleteTags(params).promise();
+        console.log('RESULT::', result);
+    } catch (error) {
+        console.log('ERROR::', error);
+    }
+}
 
-// async function tagger(instances, tagsToAdd) {
-
-//     try {
-//         var params = {
-//             "Resources": instances,
-//             "Tags": tagsToAdd
-//         };
-//         let result = await EC2.createTags(params).promise();
-//         console.log('RESULT::', result);
-//     } catch (error) {
-//         console.log('ERROR::', error);
-
-//     }
-// }
-
-// async function untagger(instances, tagsToRemove) {
-//     try {
-//         var params = {
-//             "Resources": instances,
-//             "Tags": tagsToRemove
-//         };
-//         let result = await EC2.deleteTags(params).promise();
-//         console.log('RESULT::', result);
-//     } catch (error) {
-//         console.log('ERROR::', error);
-//     }
-// }
-
-// function keyValueJSONForm(arrayTags) {
-//     let result = [];
-//     arrayTags.map(data => {
-//         var key = Object.keys(data);
-//         result.push({
-//             "Key": key[0],
-//             "Value": data[key[0]]
-//         })
-//     });
-//     return result;
-// }
+function keyValueJSONForm(arrayTags, remove) {
+    let result = [];
+    arrayTags.map(data => {
+        var key = Object.keys(data);
+        if (remove) {
+            result.push({
+                "Key": key[0],
+            });
+        } else {
+            result.push({
+                "Key": key[0],
+                "Value": data[key[0]]
+            });
+        }
+    });
+    return result;
+}
 
 module.exports = {
     getInstances,
